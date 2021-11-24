@@ -9,6 +9,7 @@ SRC_INFLATE = ${wildcard test_inflate.c test_utils.c inflate/*.c}
 SRC_STRESS  = ${wildcard test_stress.c  test_utils.c}
 SRC_INFLATESYNCPOINT = ${wildcard test_inflatesyncpoint.c test_utils.c}
 SRC_ZEROINPUT = ${wildcard test_zeroinput.c test_utils.c}
+SRC_SCP = ${wildcard test_scp.c}
 obj_test_deflate = ${patsubst %.c, %.o, $(SRC_DEFLATE)}
 obj_test_inflate = ${patsubst %.c, %.o, $(SRC_INFLATE)}
 obj_test_stress  = ${patsubst %.c, %.o, $(SRC_STRESS)}
@@ -18,12 +19,13 @@ obj_test_multithread_stress = ${patsubst %.c, %.o, test_multithread_stress.c}
 obj_test_pid_reuse = ${patsubst %.c, %.o, test_pid_reuse.c}
 obj_test_inflatesyncpoint = ${patsubst %.c, %.o, $(SRC_INFLATESYNCPOINT)}
 obj_test_zeroinput = ${patsubst %.c, %.o, $(SRC_ZEROINPUT)}
+obj_test_scp = ${patsubst %.c, %.o, $(SRC_SCP)}
 
 TEST_OBJS = $(sort $(obj_test_deflate) $(obj_test_inflate) $(obj_test_stress) \
     $(obj_test_crc32) $(obj_test_adler32) $(obj_test_multithread_stress) \
-    $(obj_test_inflatesyncpoint) $(obj_test_zeroinput))
+    $(obj_test_inflatesyncpoint) $(obj_test_zeroinput) $(obj_test_scp))
 EXE = test_inflate test_deflate test_stress test_crc32 test_adler32 \
-    test_multithread_stress test_pid_reuse test_inflatesyncpoint test_zeroinput
+    test_multithread_stress test_pid_reuse test_inflatesyncpoint test_zeroinput test_scp
 UNSAFE = test_stress
 
 all:
