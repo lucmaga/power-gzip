@@ -322,3 +322,6 @@ int _test_nx_inflate(Byte* compr, unsigned int comprLen, Byte* uncompr,
 
 	return TEST_OK;
 }
+
+#define printm (char** message, ...) \
+	printf("%s:%s *** " message,FILE, LINE, __VA_ARGS__)
