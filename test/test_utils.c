@@ -238,17 +238,29 @@ int _test_inflate(Byte* compr, unsigned int comprLen, Byte* uncompr,
 	if (time != NULL)
 		gettimeofday(&time->start, NULL);
 
-	while (d_stream.total_out < uncomprLen) {
+	d_stream.avail_out = step;
+	do {
 		if (d_stream.total_in < comprLen)
 			d_stream.avail_in = step;
-		d_stream.avail_out = step;
 		err = inflate(&d_stream, Z_NO_FLUSH);
 		if (err == Z_STREAM_END) break;
+		/* Z_BUF_ERROR could mean that we need more output. */
+		if (err == Z_BUF_ERROR) {
+			/* Get more room for output */
+			d_stream.avail_out += step;
+			if (d_stream.total_out + d_stream.avail_out > uncomprLen){
+				printf("*** failed: inflate has no more buffer for output");
+				return TEST_ERROR;
+			}
+			continue;
+		}
+		if (err == Z_OK)
+			d_stream.avail_out = step;
 		if (err < 0) {
 			printf("*** failed: inflate returned %d\n", err);
 			return TEST_ERROR;
 		}
-	}
+	} while (d_stream.total_out < uncomprLen);
 
 	if (time != NULL)
 		gettimeofday(&time->end, NULL);
@@ -295,17 +307,29 @@ int _test_nx_inflate(Byte* compr, unsigned int comprLen, Byte* uncompr,
 	if (time != NULL)
 		gettimeofday(&time->start, NULL);
 
-	while (d_stream.total_out < uncomprLen) {
+	d_stream.avail_out = step;
+	do {
 		if (d_stream.total_in < comprLen)
 			d_stream.avail_in = step;
-		d_stream.avail_out = step;
-		err = nx_inflate(&d_stream, flush);
+		err = nx_inflate(&d_stream, Z_NO_FLUSH);
 		if (err == Z_STREAM_END) break;
+		/* Z_BUF_ERROR could mean that we need more output. */
+		if (err == Z_BUF_ERROR) {
+			/* Get more room for output */
+			d_stream.avail_out += step;
+			if (d_stream.total_out + d_stream.avail_out > uncomprLen){
+				printf("*** failed: nx_inflate has no more buffer for output");
+				return TEST_ERROR;
+			}
+			continue;
+		}
+		if (err == Z_OK)
+			d_stream.avail_out = step;
 		if (err < 0) {
 			printf("*** failed: nx_inflate returned %d\n", err);
 			return TEST_ERROR;
 		}
-	}
+	} while (d_stream.total_out < uncomprLen);
 
 	if (time != NULL)
 		gettimeofday(&time->end, NULL);
