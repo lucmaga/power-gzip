@@ -6,4 +6,4 @@ We can get page fault on data page or CRB itself.
 
 1. When I got a cc=5, why I did not get a signal SIGSEGV? Should I use SIGSEGV or other to get more information?
 
-	Means the fault is not on CRB page and is expected. 
+	Means the fault is not on CRB page and is expected.

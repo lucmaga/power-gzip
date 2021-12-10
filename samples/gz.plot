@@ -18,4 +18,4 @@ plot  'tmp.log' using 5:(($5/(($12+$18)/$9))/1.0e9) with linespoints title 'p9 c
       'tmp2.log' using 7:(($7/($1-$5+0.001))/1.0e9) every ::12::100 with linespoints title 'gzip'
 
 
-     
+

@@ -7,7 +7,7 @@ C=$2
 
 rm -f *.nx.gunzip
 
-for S in `seq 1 $C` 
+for S in `seq 1 $C`
 do
     FN=$S.$1
 	echo $FN
@@ -23,7 +23,7 @@ done
 nodes=`numastat | head -1`
 for S in `seq 1 $C`
 do
-	FN=$S.$1    
+	FN=$S.$1
 	for i in $nodes
 	do
 		node=`echo $i | cut -c 5`
@@ -34,4 +34,4 @@ done
 wait
 
 
- 
+

@@ -31,10 +31,10 @@ int main()
     if ( chmod("/tmp/nx.log", (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH | S_ISVTX)) ) {
 	perror("cannot chmod but will continue\n");
     }
-    
+
     fprintf(nx_gzip_log, "this is a test, pid=%d uid=%d\n", getpid(), getuid());
     fflush(nx_gzip_log);
-    
+
     sleep(100);
 
     if ( fclose(nx_gzip_log) ) {

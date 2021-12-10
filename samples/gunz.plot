@@ -20,4 +20,4 @@ plot 'tmp2.log' using 4:(($4/($9/($6+$14)))/1.0e9) with linespoints title 'p9 de
 
 
 
-     
+

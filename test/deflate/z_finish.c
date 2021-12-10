@@ -10,17 +10,17 @@ static int _test_nx_deflatef(Byte* src, unsigned int src_len, Byte* compr,
 {
 	int err;
 	z_stream c_stream;
-	
+
 	c_stream.zalloc = zalloc;
 	c_stream.zfree = zfree;
 	c_stream.opaque = (voidpf)0;
-	
+
 	err = nx_deflateInit(&c_stream, Z_DEFAULT_COMPRESSION);
 	if (err != 0) {
 		printf("nx_deflateInit err %d\n", err);
 		return TEST_ERROR;
 	}
-	
+
 	c_stream.next_in  = (z_const unsigned char *)src;
 	c_stream.next_out = compr;
 

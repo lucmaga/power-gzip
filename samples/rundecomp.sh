@@ -8,10 +8,10 @@ do
 	head -c $SZ $1 > $FN
 	cat $FN > /dev/null
 	/usr/bin/time  -f "\t%e real \t%U user \t%S sys" ./gzip_nxfht_test $FN
-	echo	
+	echo
 	cat $FN.nx.gz > /dev/null
-	/usr/bin/time  -f "\t%e real \t%U user \t%S sys" ./gunzip_nx_test $FN.nx.gz	
+	/usr/bin/time  -f "\t%e real \t%U user \t%S sys" ./gunzip_nx_test $FN.nx.gz
 	rm -f $FN $FN.nx.gz $FN.*.nx.gunzip
 	echo
 done
- 
+

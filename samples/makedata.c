@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 	if (argc == 5 && strcmp(argv[1], "-s") == 0 && strcmp(argv[3], "-b") == 0) {
 		seed = atoi(argv[2]);
 		bufsz = 1UL << atoi(argv[4]);
-	}	
+	}
 	if ((argc == 1) || (argc == 2 && strcmp(argv[1], "-h") == 0)) {
 		fprintf(stderr,"randomly produces a data file using a seed number and any input file\n");
 		fprintf(stderr,"usage: %s -s rngseed -b log2bufsize < seedfile > outputfile\n", argv[0]);
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 	bufsz = bufsz + (lrand48() % 2) * (lrand48() % (bufsz/10));
 
 	fprintf(stderr, "seed %d bufsz %ld\n", seed, bufsz);
-	
+
 	assert(NULL != (buf = malloc(bufsz)));
 
 	/* read up to half the buffer size */
@@ -46,10 +46,10 @@ int main(int argc, char **argv)
 
 	/* next free location */
 	idx = readsz;
-	
+
 	ulong len_max = (lrand48() % 240UL) + 10;
 	ulong dist_max = (lrand48() % (1UL<<16)) + 1;
-	  
+
 	while(idx < bufsz) {
 
 		/* pick random point in the buffer and copy */
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 
 		/* fprintf(stderr, "dist_max %ld len_max %ld dist %ld len %ld\n", dist_max, len_max, dist, len); */
 
-		if (dist > idx) 
+		if (dist > idx)
 			dist = idx; /* out of bounds */
 
 		/* copy */

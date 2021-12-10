@@ -7,7 +7,7 @@ C=$2
 
 rm -f *.nx.gunzip
 
-for S in `seq 1 $C` 
+for S in `seq 1 $C`
 do
     FN=$S.$1
 	echo $FN
@@ -22,11 +22,11 @@ done
 
 for S in `seq 1 $C`
 do
-    FN=$S.$1    
+    FN=$S.$1
     /usr/bin/time  -f "\t%e real \t%U user \t%S sys" ./gunzip_nx_test $FN  &
 done
 
 wait
 
 
- 
+

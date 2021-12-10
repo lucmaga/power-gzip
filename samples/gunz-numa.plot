@@ -35,4 +35,4 @@ plot 'tmp1.log' using ($4/$23):($16*4.0/1.0e9) with linespoints title '4 threads
 
 
 
-     
+

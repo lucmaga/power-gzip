@@ -103,37 +103,37 @@ static int compress_dht_sample(char *src, uint32_t srclen, char *dst, uint32_t d
 	/* The reason we use a RESUME function code from get go is
 	   because we can; resume is equivalent to a non-resume
 	   function code when in_histlen=0 */
-	if (with_count) 
+	if (with_count)
 		fc = GZIP_FC_COMPRESS_RESUME_DHT_COUNT;
-	else 
+	else
 		fc = GZIP_FC_COMPRESS_RESUME_DHT;
 
 	putnn(cmdp->crb, gzip_fc, fc);
 	/* resuming with no history; not optimal but good enough for the sample code */
 	putnn(cmdp->cpb, in_histlen, 0);
 	memset((void *)&cmdp->crb.csb, 0, sizeof(cmdp->crb.csb));
-    
+
 	/* Section 6.6 programming notes; spbc may be in two different places depending on FC */
-	if (!with_count) 
+	if (!with_count)
 		put32(cmdp->cpb, out_spbc_comp, 0);
-	else 
+	else
 		put32(cmdp->cpb, out_spbc_comp_with_count, 0);
-    
+
 	/* Figure 6-3 6-4; CSB location */
-	put64(cmdp->crb, csb_address, 0);    
+	put64(cmdp->crb, csb_address, 0);
 	put64(cmdp->crb, csb_address, (uint64_t) &cmdp->crb.csb & csb_address_mask);
-    
+
 	/* source direct dde */
-	clear_dde(cmdp->crb.source_dde);    
-	putnn(cmdp->crb.source_dde, dde_count, 0); 
-	put32(cmdp->crb.source_dde, ddebc, srclen); 
+	clear_dde(cmdp->crb.source_dde);
+	putnn(cmdp->crb.source_dde, dde_count, 0);
+	put32(cmdp->crb.source_dde, ddebc, srclen);
 	put64(cmdp->crb.source_dde, ddead, (uint64_t) src);
 
 	/* target direct dde */
-	clear_dde(cmdp->crb.target_dde);        
+	clear_dde(cmdp->crb.target_dde);
 	putnn(cmdp->crb.target_dde, dde_count, 0);
 	put32(cmdp->crb.target_dde, ddebc, dstlen);
-	put64(cmdp->crb.target_dde, ddead, (uint64_t) dst);   
+	put64(cmdp->crb.target_dde, ddead, (uint64_t) dst);
 
 	/* fprintf(stderr, "in_dhtlen %x\n", getnn(cmdp->cpb, in_dhtlen) );
 	   fprintf(stderr, "in_dht %02x %02x\n", cmdp->cpb.in_dht_char[0],cmdp->cpb.in_dht_char[16]); */
@@ -141,10 +141,10 @@ static int compress_dht_sample(char *src, uint32_t srclen, char *dst, uint32_t d
 	/* submit the crb */
 	nxu_run_job(cmdp, handle);
 
-	/* poll for the csb.v bit; you should also consider expiration */        
+	/* poll for the csb.v bit; you should also consider expiration */
 	do {;} while (getnn(cmdp->crb.csb, csb_v) == 0);
 
-	/* CC Table 6-8 */        
+	/* CC Table 6-8 */
 	cc = getnn(cmdp->crb.csb, csb_cc);
 
 	return cc;
@@ -163,7 +163,7 @@ static int gzip_header_blank(char *buf)
 	buf[i++] = 0x00; /* MTIME */
 	buf[i++] = 0x00; /* MTIME */
 	buf[i++] = 0x00; /* MTIME */
-	buf[i++] = 0x00; /* MTIME */            
+	buf[i++] = 0x00; /* MTIME */
 	buf[i++] = 0x04; /* XFL 4=fastest */
 	buf[i++] = 0x03; /* OS UNIX */
 	return i;
@@ -175,8 +175,8 @@ static int append_sync_flush(char *buf, int tebc, int final)
 	uint64_t flush;
 	int shift = (tebc & 0x7);
 	if (tebc > 0) {
-		/* last byte is partially full */	
-		buf = buf - 1; 
+		/* last byte is partially full */
+		buf = buf - 1;
 		*buf = *buf & (unsigned char)((1<<tebc)-1);
 	}
 	else *buf = 0;
@@ -208,10 +208,10 @@ static int nx_touch_pages(void *buf, long buf_len, long page_len, int wr)
 	assert(buf_len >= 0 && !!buf);
 
 	NXPRT( fprintf(stderr, "touch %p %p len 0x%lx wr=%d\n", buf, buf + buf_len, buf_len, wr) );
-	
+
 	if (buf_len <= 0 || buf == NULL)
 		return -1;
-	
+
 	do {
 		t = *begin;
 		if (wr) *begin = t;
@@ -220,7 +220,7 @@ static int nx_touch_pages(void *buf, long buf_len, long page_len, int wr)
 
 	/* when buf_sz is small or buf tail is in another page */
 	t = *end;
-	if (wr) *end = t;	
+	if (wr) *end = t;
 
 	return 0;
 }
@@ -235,17 +235,17 @@ static void nx_print_dde(nx_dde_t *ddep, const char *msg)
 	int i;
 
 	ASSERT(!!ddep);
-	
+
 	indirect_count = getpnn(ddep, dde_count);
 	buf_len = getp32(ddep, ddebc);
 
 	NXPRT( fprintf(stderr, "%s dde %p dde_count %d, ddebc 0x%x\n", msg, ddep, indirect_count, buf_len) );
-	
+
 	if (indirect_count == 0) {
 		/* direct dde */
 		buf_len = getp32(ddep, ddebc);
 		buf_addr = getp64(ddep, ddead);
-		NXPRT( fprintf(stderr, "  direct dde: ddebc 0x%x ddead %p %p\n", buf_len, (void *)buf_addr, (void *)buf_addr + buf_len) );	
+		NXPRT( fprintf(stderr, "  direct dde: ddebc 0x%x ddead %p %p\n", buf_len, (void *)buf_addr, (void *)buf_addr + buf_len) );
 		return;
 	}
 
@@ -261,12 +261,12 @@ static void nx_print_dde(nx_dde_t *ddep, const char *msg)
 	for (i=0; i < indirect_count; i++) {
 		buf_len = get32(dde_list[i], ddebc);
 		buf_addr = get64(dde_list[i], ddead);
-		NXPRT( fprintf(stderr, " indirect dde: ddebc 0x%x ddead %p %p\n", buf_len, (void *)buf_addr, (void *)buf_addr + buf_len) );	
+		NXPRT( fprintf(stderr, " indirect dde: ddebc 0x%x ddead %p %p\n", buf_len, (void *)buf_addr, (void *)buf_addr + buf_len) );
 	}
 	return;
 }
 
-/* 
+/*
    Adds an (address, len) pair to the list of ddes (ddl) and updates
    the base dde.  ddl[0] is the only dde in a direct dde which
    contains a single (addr,len) pair.  For more pairs, ddl[0] becomes
@@ -288,17 +288,17 @@ static inline uint32_t nx_append_dde(nx_dde_t *ddl, void *addr, uint32_t len)
 	}
 
 	NXPRT( fprintf(stderr, "%d: nx_append_dde addr %p len %x\n", __LINE__, addr, len ) );
-	
+
 	/* number of ddes in the dde list ; == 0 when it is a direct dde */
-	ddecnt = getpnn(ddl, dde_count); 
+	ddecnt = getpnn(ddl, dde_count);
 	bytes = getp32(ddl, ddebc);
 
 	/* NXPRT( fprintf(stderr, "%d: get dde_count %d ddebc %d\n", __LINE__, ddecnt, bytes ) ); */
-	
+
 	if (ddecnt == 0 && bytes == 0) {
 		/* first dde is unused; make it a direct dde */
 		bytes = len;
-		putp32(ddl, ddebc, bytes); 
+		putp32(ddl, ddebc, bytes);
 		putp64(ddl, ddead, (uint64_t) addr);
 
 		/* NXPRT( fprintf(stderr, "%d: put ddebc %d ddead %p\n", __LINE__, bytes, (void *)addr ) ); */
@@ -306,11 +306,11 @@ static inline uint32_t nx_append_dde(nx_dde_t *ddl, void *addr, uint32_t len)
 	else if (ddecnt == 0) {
 		/* converting direct to indirect dde */
 		/* ddl[0] becomes head dde of ddl */
-		/* copy direct to indirect first */	  
-		ddl[1]= ddl[0]; 
+		/* copy direct to indirect first */
+		ddl[1]= ddl[0];
 
 		/* add the new dde next */
-		clear_dde(ddl[2]);			
+		clear_dde(ddl[2]);
 		put32(ddl[2], ddebc, len);
 		put64(ddl[2], ddead, (uint64_t) addr);
 
@@ -319,8 +319,8 @@ static inline uint32_t nx_append_dde(nx_dde_t *ddl, void *addr, uint32_t len)
 		putpnn(ddl, dde_count, ddecnt);
 		bytes = bytes + len;
 		putp32(ddl, ddebc, bytes);
-		/* pointer to the first direct dde */			
-		putp64(ddl, ddead, (uint64_t) &ddl[1]); 
+		/* pointer to the first direct dde */
+		putp64(ddl, ddead, (uint64_t) &ddl[1]);
 	}
 	else {
 		/* append a dde to an existing indirect ddl */
@@ -328,7 +328,7 @@ static inline uint32_t nx_append_dde(nx_dde_t *ddl, void *addr, uint32_t len)
 		clear_dde(ddl[ddecnt]);
 		put64(ddl[ddecnt], ddead, (uint64_t) addr);
 		put32(ddl[ddecnt], ddebc, len);
-		
+
 		putpnn(ddl, dde_count, ddecnt);
 		bytes = bytes + len;
 		putp32(ddl, ddebc, bytes); /* byte sum of all dde */
@@ -336,11 +336,11 @@ static inline uint32_t nx_append_dde(nx_dde_t *ddl, void *addr, uint32_t len)
 	return bytes;
 }
 
-/* 
+/*
    Touch specified number of pages represented in number bytes
-   beginning from the first buffer in a dde list. 
+   beginning from the first buffer in a dde list.
    Do not touch the pages past buf_sz-th byte's page.
-   
+
    Set buf_sz = 0 to touch all pages described by the ddep.
 */
 static int nx_touch_pages_dde(nx_dde_t *ddep, long buf_sz, long page_sz, int wr)
@@ -354,22 +354,22 @@ static int nx_touch_pages_dde(nx_dde_t *ddep, long buf_sz, long page_sz, int wr)
 	int i;
 
 	ASSERT(!!ddep);
-	
+
 	indirect_count = getpnn(ddep, dde_count);
 
-	NXPRT( fprintf(stderr, "nx_touch_pages_dde dde_count %d request len 0x%lx\n", indirect_count, buf_sz) ); 
-	
+	NXPRT( fprintf(stderr, "nx_touch_pages_dde dde_count %d request len 0x%lx\n", indirect_count, buf_sz) );
+
 	if (indirect_count == 0) {
 		/* direct dde */
 		buf_len = getp32(ddep, ddebc);
 		buf_addr = getp64(ddep, ddead);
 
-		NXPRT( fprintf(stderr, "touch direct ddebc 0x%x ddead %p\n", buf_len, (void *)buf_addr) ); 
-		
+		NXPRT( fprintf(stderr, "touch direct ddebc 0x%x ddead %p\n", buf_len, (void *)buf_addr) );
+
 		if (buf_sz == 0)
 			nx_touch_pages((void *)buf_addr, buf_len, page_sz, wr);
-		else 
-			nx_touch_pages((void *)buf_addr, NX_MIN(buf_len, buf_sz), page_sz, wr);		
+		else
+			nx_touch_pages((void *)buf_addr, NX_MIN(buf_len, buf_sz), page_sz, wr);
 
 		return ERR_NX_OK;
 	}
@@ -383,7 +383,7 @@ static int nx_touch_pages_dde(nx_dde_t *ddep, long buf_sz, long page_sz, int wr)
 
 	if( buf_sz == 0 )
 		buf_sz = getp32(ddep, ddebc);
-	
+
 	total = 0;
 	for (i=0; i < indirect_count; i++) {
 		buf_len = get32(dde_list[i], ddebc);
@@ -391,23 +391,23 @@ static int nx_touch_pages_dde(nx_dde_t *ddep, long buf_sz, long page_sz, int wr)
 		total += buf_len;
 
 		nx_touch_pages((void *)&(dde_list[i]), sizeof(nx_dde_t), page_sz, 0);
-		
-		NXPRT( fprintf(stderr, "touch loop len 0x%x ddead %p total 0x%lx\n", buf_len, (void *)buf_addr, total) ); 
+
+		NXPRT( fprintf(stderr, "touch loop len 0x%x ddead %p total 0x%lx\n", buf_len, (void *)buf_addr, total) );
 
 		/* touching fewer pages than encoded in the ddebc */
 		if ( total > buf_sz) {
 			buf_len = NX_MIN(buf_len, total - buf_sz);
 			nx_touch_pages((void *)buf_addr, buf_len, page_sz, wr);
-			NXPRT( fprintf(stderr, "touch loop break len 0x%x ddead %p\n", buf_len, (void *)buf_addr) ); 			
+			NXPRT( fprintf(stderr, "touch loop break len 0x%x ddead %p\n", buf_len, (void *)buf_addr) );
 			break;
 		}
-		nx_touch_pages((void *)buf_addr, buf_len, page_sz, wr);		
+		nx_touch_pages((void *)buf_addr, buf_len, page_sz, wr);
 	}
 	return ERR_NX_OK;
 }
 
 /*
-  Final deflate block bit. This call assumes the block 
+  Final deflate block bit. This call assumes the block
   beginning is byte aligned.
 */
 static void set_bfinal(void *buf, int bfinal)
@@ -456,7 +456,7 @@ void *nxlite_begin()
 		return NULL;
 	}
 	memset(h, 0, sizeof(nxlite_handle_t));
-	
+
 	/* open the device and save the device pointer in h */
 	if (NULL == (h->device_handle = nx_function_begin(NX_FUNC_COMP_GZIP, 0))) {
 		fprintf(stderr, "Unable to init NX, errno %d\n", errno);
@@ -478,7 +478,7 @@ void *nxlite_begin()
 	act.sa_restorer = 0;
 	sigemptyset(&act.sa_mask);
 	sigaction(SIGSEGV, &act, NULL);
-	
+
 	return h;
 }
 
@@ -489,7 +489,7 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 	char *inbuf, *outbuf, *srcbuf, *dstbuf;
 	uint32_t srclen, dstlen;
 	uint32_t flushlen, chunk;
-	size_t inlen, outlen, dsttotlen, srctotlen;	
+	size_t inlen, outlen, dsttotlen, srctotlen;
 	uint32_t adler, crc, spbc, tpbc, tebc;
 	int lzcounts=1; /* always collect lzcounts */
 	int initial_pass;
@@ -519,16 +519,16 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 	}
 	/* reuse the supplied handle */
 	else myhandle = *handlep;
-	
-	/* compress piecemeal in small chunks */    
+
+	/* compress piecemeal in small chunks */
 	chunk = NX_CHUNK_SZ;
 
-	/* write the gzip header */    
-	num_hdr_bytes = gzip_header_blank(outbuf); 
+	/* write the gzip header */
+	num_hdr_bytes = gzip_header_blank(outbuf);
 	dstbuf    = outbuf + num_hdr_bytes;
-	outlen    = outlen - num_hdr_bytes;	
+	outlen    = outlen - num_hdr_bytes;
 	dsttotlen = num_hdr_bytes;
-	
+
 	srcbuf    = inbuf;
 	srctotlen = 0;
 
@@ -543,7 +543,7 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 	/* Fill in with the default dht here; instead we could also do
 	   fixed huffman with counts for sampling the LZcounts; fixed
 	   huffman doesn't need a dht_lookup */
-	dht_lookup(cmdp, dht_default_req, myhandle->dht_handle); 
+	dht_lookup(cmdp, dht_default_req, myhandle->dht_handle);
 	initial_pass = 1;
 
 	fault_tries = 50;
@@ -554,8 +554,8 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 		/* will submit a chunk size source per job */
 		srclen = NX_MIN(chunk, inlen);
 		/* supply large target in case data expands; 288
-		   is for very small src plus the dht headroom */				
-		dstlen = NX_MIN(2 * srclen + 288, outlen); 
+		   is for very small src plus the dht headroom */
+		dstlen = NX_MIN(2 * srclen + 288, outlen);
 
 		if (initial_pass == 1) {
 			/* If requested a first pass to collect
@@ -573,10 +573,10 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 			   or computed DHT; I don't need to sample the
 			   data anymore; previous run's lzcount
 			   is a good enough as an lzcount of this run */
-			dht_lookup(cmdp, dht_search_req, myhandle->dht_handle); 
+			dht_lookup(cmdp, dht_search_req, myhandle->dht_handle);
 		}
 
-		/* Page faults are handled by the user code */		
+		/* Page faults are handled by the user code */
 
 		/* Fault-in pages; an improved code wouldn't touch so
 		   many pages but would try to estimate the
@@ -584,7 +584,7 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 		   touch amounts */
 		nx_touch_pages (cmdp, sizeof(*cmdp), pagelen, 0);
 		nx_touch_pages (srcbuf, srclen, pagelen, 0);
-		nx_touch_pages (dstbuf, dstlen, pagelen, 1);	    
+		nx_touch_pages (dstbuf, dstlen, pagelen, 1);
 
 		cc = compress_dht_sample(
 			srcbuf, srclen,
@@ -596,7 +596,7 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 			fprintf(stderr, "nx error: cc= %d\n", cc);
 			return Z_STREAM_ERROR; //exit(-1);
 		}
-		
+
 		/* Page faults are handled by the user code */
 		if (cc == ERR_NX_AT_FAULT) {
 			volatile char touch = *(char *)cmdp->crb.csb.fsaddr;
@@ -607,8 +607,8 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 			}
 			else {
 				fprintf(stderr, "error: cannot progress; too many faults\n");
-				return Z_STREAM_ERROR; //exit(-1);				
-			}			    
+				return Z_STREAM_ERROR; //exit(-1);
+			}
 		}
 		else if (cc == ERR_NX_TARGET_SPACE) {
 			fprintf(stderr, "target buffer size too small: cc= %d\n", cc );
@@ -623,7 +623,7 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 			initial_pass = 0;
 			goto initial_pass_done;
 		}
-	    
+
 		inlen     = inlen - srclen;
 		srcbuf    = srcbuf + srclen;
 		srctotlen = srctotlen + srclen;
@@ -636,7 +636,7 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 		tpbc = get32(cmdp->crb.csb, tpbc);  /* target byte count */
 		tebc = getnn(cmdp->cpb, out_tebc);  /* target ending bit count */
 		NXPRT( fprintf(stderr, "compressed chunk %d to %d bytes, tebc= %d\n", spbc, tpbc, tebc) );
-	    
+
 		if (inlen > 0) { /* more chunks to go */
 			/* This sample code does not use compression
 			   history.  It will hurt the compression
@@ -646,16 +646,16 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 			dsttotlen = dsttotlen + tpbc;
 			outlen    = outlen - tpbc;
 			/* round up to the next byte with a flush
-			 * block; do not set the BFINAL bit */		    
+			 * block; do not set the BFINAL bit */
 			flushlen  = append_sync_flush(dstbuf, tebc, 0);
 			dsttotlen = dsttotlen + flushlen;
-			outlen    = outlen - flushlen;			
+			outlen    = outlen - flushlen;
 			dstbuf    = dstbuf + flushlen;
 			NXPRT( fprintf(stderr, "added deflate sync_flush %d bytes\n", flushlen) );
 		}
-		else {  /* done */ 
+		else {  /* done */
 			/* set the BFINAL bit of the last block per deflate std */
-			set_bfinal(dstbuf, 1);		    
+			set_bfinal(dstbuf, 1);
 			/* *dstbuf   = *dstbuf | (unsigned char) 0x01;  */
 			dstbuf    = dstbuf + tpbc;
 			dsttotlen = dsttotlen + tpbc;
@@ -664,7 +664,7 @@ static int nxlite_compress(char *dest, uint64_t *destLen,
 
 		/* resuming crc for the next chunk */
 		crc = get32(cmdp->cpb, out_crc);
-		put32(cmdp->cpb, in_crc, crc); 
+		put32(cmdp->cpb, in_crc, crc);
 		crc = be32toh(crc);
 	}
 
@@ -690,7 +690,7 @@ static void sigsegv_handler(int sig, siginfo_t *info, void *ctx)
 		sig, info->si_code, info->si_addr);
 
 	/* exit(-1); */
-	nx_fault_storage_address = info->si_addr; 
+	nx_fault_storage_address = info->si_addr;
 }
 
 
@@ -716,7 +716,7 @@ int compress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
 	nxlite_end(handle);
 
 	return rc;
-}	
+}
 
 
 /*
@@ -746,7 +746,7 @@ int main()
 }
 
 
-  
+
 
 
 
@@ -754,16 +754,16 @@ int main()
 /* ************************************ */
 
 const int fifo_in_len = 1<<24;
-const int fifo_out_len = 1<<24;	
+const int fifo_out_len = 1<<24;
 const int page_sz = 1<<16;
 const int line_sz = 1<<7;
 const int window_max = 1<<15;
 const int retry_max = 50;
 
 
-/* 
-   Src and dst buffers are supplied in scatter gather lists. 
-   NX function code and other parameters supplied in cmdp 
+/*
+   Src and dst buffers are supplied in scatter gather lists.
+   NX function code and other parameters supplied in cmdp
 */
 static int nx_submit_job(nx_dde_t *src, nx_dde_t *dst, nx_gzip_crb_cpb_t *cmdp, void *handle)
 {
@@ -771,7 +771,7 @@ static int nx_submit_job(nx_dde_t *src, nx_dde_t *dst, nx_gzip_crb_cpb_t *cmdp, 
 	uint64_t csbaddr;
 
 	memset( (void *)&cmdp->crb.csb, 0, sizeof(cmdp->crb.csb) );
-	
+
 	cmdp->crb.source_dde = *src;
 	cmdp->crb.target_dde = *dst;
 
@@ -779,7 +779,7 @@ static int nx_submit_job(nx_dde_t *src, nx_dde_t *dst, nx_gzip_crb_cpb_t *cmdp, 
 	csbaddr = ((uint64_t) &cmdp->crb.csb) & csb_address_mask;
 	put64(cmdp->crb, csb_address, csbaddr);
 
-	/* nx reports input bytes in spbc; cleared */	
+	/* nx reports input bytes in spbc; cleared */
 	cmdp->cpb.out_spbc_comp_wrap = 0;
 	cmdp->cpb.out_spbc_comp_with_count = 0;
 	cmdp->cpb.out_spbc_decomp = 0;
@@ -787,15 +787,15 @@ static int nx_submit_job(nx_dde_t *src, nx_dde_t *dst, nx_gzip_crb_cpb_t *cmdp, 
 	/* clear output */
 	put32(cmdp->cpb, out_crc, INIT_CRC );
 	put32(cmdp->cpb, out_adler, INIT_ADLER);
-	
+
 	NXPRT( nx_print_dde(src, "source") );
 	NXPRT( nx_print_dde(dst, "target") );
-	
+
 	cc = nxu_run_job(cmdp, handle);
 
-	if( !cc ) 
+	if( !cc )
 		cc = getnn( cmdp->crb.csb, csb_cc ); 	/* CC Table 6-8 */
-	
+
 	return cc;
 }
 
@@ -814,7 +814,7 @@ static int nx_submit_job(nx_dde_t *src, nx_dde_t *dst, nx_gzip_crb_cpb_t *cmdp, 
 #define fifo_free_last_offset(cur, used, len)  fifo_used_last_bytes(cur, used, len)
 /* first and last used parts start here */
 #define fifo_used_first_offset(cur)            (cur)
-#define fifo_used_last_offset(cur)             (0)	
+#define fifo_used_last_offset(cur)             (0)
 
 
 /* fifo queue management */
@@ -822,7 +822,7 @@ static int nx_submit_job(nx_dde_t *src, nx_dde_t *dst, nx_gzip_crb_cpb_t *cmdp, 
 #define buffer_free_bytes(cur, used, len) ((len)-((cur)+(used)))
 /* amount of free bytes in the first and last parts */
 #define buffer_free_first_bytes(cur, used, len)  ((len)-((cur)+(used)))
-#define buffer_free_last_bytes(cur, used, len)   0 
+#define buffer_free_last_bytes(cur, used, len)   0
 /* amount of used bytes in the first and last parts */
 #define buffer_used_first_bytes(cur, used, len)  (used)
 #define buffer_used_last_bytes(cur, used, len)   0
@@ -831,7 +831,7 @@ static int nx_submit_job(nx_dde_t *src, nx_dde_t *dst, nx_gzip_crb_cpb_t *cmdp, 
 #define buffer_free_last_offset(cur, used, len)  buffer_used_last_bytes(cur, used, len)
 /* first and last used parts start here */
 #define buffer_used_first_offset(cur)            (cur)
-#define buffer_used_last_offset(cur)             (0)	
+#define buffer_used_last_offset(cur)             (0)
 
 
 
@@ -855,12 +855,12 @@ static int nxlite_uncompress(char *dest, uint64_t *destLen,
 	uint64_t last_comp_ratio; /* 1000 max */
 	uint64_t total_out;
 	int is_final, is_eof;
-	
+
 	/* nx hardware */
 	int sfbt, subc, spbc, tpbc, nx_ce, fc, resuming = 0;
 	int history_len=0;
 	nx_gzip_crb_cpb_t cmd, *cmdp;
-        nx_dde_t *ddl_in;        
+        nx_dde_t *ddl_in;
         nx_dde_t dde_in[6]  __attribute__ ((aligned (128)));
         nx_dde_t *ddl_out;
         nx_dde_t dde_out[6] __attribute__ ((aligned (128)));
@@ -870,7 +870,7 @@ static int nxlite_uncompress(char *dest, uint64_t *destLen,
 	is_final = is_eof = 0;
 
 #define GETINPC(X) *(source + cur_in++)
-	
+
 	/* Decode the gzip header */
 	c = GETINPC(); expect = 0x1f; /* ID1 */
 	if (c != expect) goto err1;
@@ -895,7 +895,7 @@ static int nxlite_uncompress(char *dest, uint64_t *destLen,
 		fprintf(stderr, "%02x ", tmp[i]);
 		if (i == 5) fprintf(stderr, "\n");
 	}
-	fprintf(stderr, "gzHeader MTIME, XFL, OS ignored\n");	
+	fprintf(stderr, "gzHeader MTIME, XFL, OS ignored\n");
 
 	/* FNAME */
 	if (flg & 0b1000) {
@@ -912,24 +912,24 @@ static int nxlite_uncompress(char *dest, uint64_t *destLen,
 	if (flg & 0b10) {
 		c = GETINPC(); c = GETINPC();
 		fprintf(stderr, "gzHeader FHCRC: ignored\n");
-	}	
+	}
 
 	cmdp = &cmd;
 	memset( &cmdp->crb, 0, sizeof(cmdp->crb) );
-	
+
 	ddl_in  = &dde_in[0];
-	ddl_out = &dde_out[0];	
-	
+	ddl_out = &dde_out[0];
+
 read_state:
 
 	/* Read from .gz file */
-	
+
 	NXPRT( fprintf(stderr, "read_state:\n") );
-	
+
 	if (is_eof != 0) goto write_state;
 
-	cur_in = (used_in == 0) ? 0 : cur_in; 
-	
+	cur_in = (used_in == 0) ? 0 : cur_in;
+
 	free_space = buffer_free_bytes(cur_in, used_in, fifo_in_len);
 
 	/* free space may wrap around as first and last */
@@ -946,7 +946,7 @@ read_state:
 		/* read in to offset cur_in + used_in */
 		n = fread(fifo_in + first_offset, 1, read_sz, inpf);
 		used_in = used_in + n;
-		free_space = free_space - n; 
+		free_space = free_space - n;
 		ASSERT(n <= read_sz);
 		if (n != read_sz) {
 			/* either EOF or error; exit the read loop */
@@ -956,7 +956,7 @@ read_state:
 	}
 
 	used_in = sourceLen;
-	
+
 
 	/* At this point we have used_in bytes in fifo_in with the
 	   data head starting at cur_in and possibly wrapping
@@ -966,9 +966,9 @@ read_state:
 write_state:
 
 	/* write decompressed data to output file */
-	
+
 	NXPRT( fprintf(stderr, "write_state:\n") );
-	
+
 	if (used_out == 0) goto decomp_state;
 
 
@@ -984,7 +984,7 @@ write_state:
 	n = 0;
 	if (write_sz > 0) {
 		n = fwrite(fifo_out + cur_out, 1, write_sz, outf);
-		used_out = used_out - n; 
+		used_out = used_out - n;
 		cur_out = (cur_out + n) % fifo_out_len; /* move head of the fifo */
 		ASSERT(n <= write_sz);
 		if (n != write_sz) {
@@ -993,23 +993,23 @@ write_state:
 			goto err5;
 		}
 	}
-	
+
 	if (last_used > 0) { /* if more data available in the last part */
 		write_sz = last_used; /* keep it here for later */
-		n = 0;		
+		n = 0;
 		if (write_sz > 0) {
 			n = fwrite(fifo_out, 1, write_sz, outf);
-			used_out = used_out - n; 
-			cur_out = (cur_out + n) % fifo_out_len;		
+			used_out = used_out - n;
+			cur_out = (cur_out + n) % fifo_out_len;
 			ASSERT(n <= write_sz);
 			if (n != write_sz) {
 				fprintf(stderr, "error: write\n");
 				rc = -1;
-				goto err5;				
+				goto err5;
 			}
 		}
 	}
-	
+
 	/* reset the fifo tail to reduce unnecessary wrap arounds
 	   cur_out = (used_out == 0) ? 0 : cur_out; */
 
@@ -1018,23 +1018,23 @@ write_state:
 decomp_state:
 
 	/* NX decompresses input data */
-	
+
 	NXPRT( fprintf(stderr, "decomp_state:\n") );
-	
+
 	if (is_final) goto finish_state;
-	
+
 	/* address/len lists */
 	clearp_dde(ddl_in);
-	clearp_dde(ddl_out);	
-	
+	clearp_dde(ddl_out);
+
 	/* FC, CRC, HistLen, Table 6-6 */
 	if (resuming) {
 		/* Resuming a partially decompressed input.
 		   The key to resume is supplying the 32KB
 		   dictionary (history) to NX, which is basically
-		   the last 32KB of output produced. 
+		   the last 32KB of output produced.
 		*/
-		fc = GZIP_FC_DECOMPRESS_RESUME; 
+		fc = GZIP_FC_DECOMPRESS_RESUME;
 
 		cmdp->cpb.in_crc   = cmdp->cpb.out_crc;
 		cmdp->cpb.in_adler = cmdp->cpb.out_adler;
@@ -1063,13 +1063,13 @@ decomp_state:
 	}
 	else {
 		/* first decompress job */
-		fc = GZIP_FC_DECOMPRESS; 
+		fc = GZIP_FC_DECOMPRESS;
 
 		history_len = 0;
 		/* writing 0 clears out subc as well */
 		cmdp->cpb.in_histlen = 0;
 		total_out = 0;
-		
+
 		put32(cmdp->cpb, in_crc, INIT_CRC );
 		put32(cmdp->cpb, in_adler, INIT_ADLER);
 		put32(cmdp->cpb, out_crc, INIT_CRC );
@@ -1083,7 +1083,7 @@ decomp_state:
 		   must retry with smaller input size. 1000 is 100%  */
 		last_comp_ratio = 100UL;
 	}
-	cmdp->crb.gzip_fc = 0;   
+	cmdp->crb.gzip_fc = 0;
 	putnn(cmdp->crb, gzip_fc, fc);
 
 	/*
@@ -1092,10 +1092,10 @@ decomp_state:
 	first_used = buffer_used_first_bytes(cur_in, used_in, fifo_in_len);
 	last_used = 0; //buffer_used_last_bytes(cur_in, used_in, fifo_in_len);
 
-	
+
 	if (first_used > 0)
 		nx_append_dde(ddl_in, fifo_in + cur_in, first_used);
-		
+
 	if (last_used > 0)
 		nx_append_dde(ddl_in, fifo_in, last_used);
 
@@ -1110,10 +1110,10 @@ decomp_state:
 	int target_max = NX_MAX(0, buffer_free_bytes(used_out, fifo_out_len) - (1<<16));
 
 	NXPRT( fprintf(stderr, "target_max %d (0x%x)\n", target_max, target_max) );
-	
+
 	first_free = NX_MIN(target_max, first_free);
 	if (first_free > 0) {
-		first_offset = buffer_free_first_offset(cur_out, used_out);		
+		first_offset = buffer_free_first_offset(cur_out, used_out);
 		nx_append_dde(ddl_out, fifo_out + first_offset, first_free);
 	}
 
@@ -1156,10 +1156,10 @@ decomp_state:
 
 
 
-	
+
 restart_nx:
 
- 	putp32(ddl_in, ddebc, source_sz);  
+ 	putp32(ddl_in, ddebc, source_sz);
 
 	/* fault in pages */
 	nx_touch_pages_dde(ddl_in, 0, page_sz, 0);
@@ -1173,7 +1173,7 @@ restart_nx:
 	case ERR_NX_AT_FAULT:
 
 		/* We touched the pages ahead of time. In the most common case we shouldn't
-		   be here. But may be some pages were paged out. Kernel should have 
+		   be here. But may be some pages were paged out. Kernel should have
 		   placed the faulting address to fsaddr */
 		NXPRT( fprintf(stderr, "ERR_NX_AT_FAULT %p\n", (void *)cmdp->crb.csb.fsaddr) );
 
@@ -1204,8 +1204,8 @@ restart_nx:
 	case ERR_NX_DATA_LENGTH:
 
 		NXPRT( fprintf(stderr, "ERR_NX_DATA_LENGTH; not an error usually; stream may have trailing data\n") );
-		
-		/* Not an error in the most common case; it just says 
+
+		/* Not an error in the most common case; it just says
 		   there is trailing data that we must examine */
 
 		/* CC=3 CE(1)=0 CE(0)=1 indicates partial completion
@@ -1226,13 +1226,13 @@ restart_nx:
 
 		}
 		else {
-			/* History length error when CE(1)=1 CE(0)=0. 
+			/* History length error when CE(1)=1 CE(0)=0.
 			   We have a bug */
 			rc = -1;
 			fprintf(stderr, "history length error cc= %d\n", cc);
 			goto err5;
 		}
-		
+
 	case ERR_NX_TARGET_SPACE:
 
 		/* Target buffer not large enough; retry smaller input
@@ -1249,9 +1249,9 @@ restart_nx:
 		fprintf(stderr, "ERR_NX_OK\n");
 		spbc = get32(cmdp->cpb, out_spbc_decomp);
 		tpbc = get32(cmdp->crb.csb, tpbc);
-		ASSERT(target_max >= tpbc);			
+		ASSERT(target_max >= tpbc);
 		ASSERT(spbc >= history_len);
-		source_sz = spbc - history_len;		
+		source_sz = spbc - history_len;
 		goto offsets_state;
 
 	default:
@@ -1275,9 +1275,9 @@ ok_cc3:
 	   history bytes.
 	*/
 
-	switch (sfbt) { 
+	switch (sfbt) {
 		int dhtlen;
-		
+
 	case 0b0000: /* Deflate final EOB received */
 
 		/* Calculating the checksum start position. */
@@ -1289,7 +1289,7 @@ ok_cc3:
 		/* Resume decompression cases are below. Basically
 		   indicates where NX has suspended and how to resume
 		   the input stream */
-		
+
 	case 0b1000: /* Within a literal block; use rembytecount */
 	case 0b1001: /* Within a literal block; use rembytecount; bfinal=1 */
 
@@ -1305,7 +1305,7 @@ ok_cc3:
 		putnn(cmdp->cpb, in_sfbt, sfbt);
 		putnn(cmdp->cpb, in_rembytecnt, getnn( cmdp->cpb, out_rembytecnt));
 		break;
-		
+
 	case 0b1010: /* Within a FH block; */
 	case 0b1011: /* Within a FH block; bfinal=1 */
 
@@ -1313,26 +1313,26 @@ ok_cc3:
 
 		/* Clear subc, histlen, sfbt, rembytecnt, dhtlen */
 		cmdp->cpb.in_subc = 0;
-		cmdp->cpb.in_sfbt = 0;		
+		cmdp->cpb.in_sfbt = 0;
 		putnn(cmdp->cpb, in_subc, subc % 8);
-		putnn(cmdp->cpb, in_sfbt, sfbt);		
+		putnn(cmdp->cpb, in_sfbt, sfbt);
 		break;
-		
+
 	case 0b1100: /* Within a DH block; */
 	case 0b1101: /* Within a DH block; bfinal=1 */
 
-		source_sz = source_sz - ((subc + 7) / 8);		
+		source_sz = source_sz - ((subc + 7) / 8);
 
 		/* Clear subc, histlen, sfbt, rembytecnt, dhtlen */
 		cmdp->cpb.in_subc = 0;
-		cmdp->cpb.in_sfbt = 0;				
+		cmdp->cpb.in_sfbt = 0;
 		putnn(cmdp->cpb, in_subc, subc % 8);
 		putnn(cmdp->cpb, in_sfbt, sfbt);
-		
+
 		dhtlen = getnn(cmdp->cpb, out_dhtlen);
 		putnn(cmdp->cpb, in_dhtlen, dhtlen);
 		ASSERT(dhtlen >= 42);
-		
+
 		/* Round up to a qword */
 		dhtlen = (dhtlen + 127) / 128;
 
@@ -1344,23 +1344,23 @@ ok_cc3:
 			--dhtlen;
 			cmdp->cpb.in_dht[dhtlen] = cmdp->cpb.out_dht[dhtlen];
 		}
-		break;		
-		
+		break;
+
 	case 0b1110: /* Within a block header; bfinal=0; */
 		     /* Also given if source data exactly ends (SUBC=0) with EOB code */
 		     /* with BFINAL=0. Means the next byte will contain a block header. */
 	case 0b1111: /* within a block header with BFINAL=1. */
 
 		source_sz = source_sz - ((subc + 7) / 8);
-		
+
 		/* Clear subc, histlen, sfbt, rembytecnt, dhtlen */
 		cmdp->cpb.in_subc = 0;
 		cmdp->cpb.in_sfbt = 0;
 		putnn(cmdp->cpb, in_subc, subc % 8);
-		putnn(cmdp->cpb, in_sfbt, sfbt);		
+		putnn(cmdp->cpb, in_sfbt, sfbt);
 	}
 
-offsets_state:	
+offsets_state:
 
 	/* Adjust the source and target buffer offsets and lengths  */
 
@@ -1377,7 +1377,7 @@ offsets_state:
 	ASSERT(used_out <= fifo_out_len);
 
 	total_out = total_out + tpbc;
-	
+
 	/* Deflate history is 32KB max. No need to supply more
 	   than 32KB on a resume */
 	history_len = (total_out > window_max) ? window_max : total_out;
@@ -1387,10 +1387,10 @@ offsets_state:
 	last_comp_ratio = (1000UL * ((uint64_t)source_sz + 1)) / ((uint64_t)tpbc + 1);
 	last_comp_ratio = NX_MAX( NX_MIN(1000UL, last_comp_ratio), 1 );
 	NXPRT( fprintf(stderr, "comp_ratio %ld source_sz %d spbc %d tpbc %d\n", last_comp_ratio, source_sz, spbc, tpbc ) );
-	
+
 	resuming = 1;
 
-finish_state:	
+finish_state:
 
 	NXPRT( fprintf(stderr, "finish_state:\n") );
 
@@ -1421,7 +1421,7 @@ finish_state:
 		}
 	}
 	else goto read_state;
-	
+
 	return -1;
 
 err1:
@@ -1471,7 +1471,7 @@ int main(int argc, char **argv)
     rc = decompress_file(argc, argv, handle);
 
     nx_function_end(handle);
-    
+
     return rc;
 }
 

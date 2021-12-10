@@ -42,7 +42,7 @@ static unsigned int crc32_align(unsigned int crc, unsigned char *p,
 }
 #endif
 
-unsigned int __crc32_vpmsum(unsigned int crc, unsigned char *p, 
+unsigned int __crc32_vpmsum(unsigned int crc, unsigned char *p,
                             unsigned long len);
 
 static uint32_t crc32_vpmsum(uint32_t crc, unsigned char *p,

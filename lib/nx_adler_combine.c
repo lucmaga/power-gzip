@@ -1,7 +1,7 @@
-/* 
+/*
  * Copyright (C) 1995-2011, 2016 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
- * 
+ *
  * Changes:
  *   nx_adler_combine.c derived from adler32.c in zlib 1.2.11.
  *   External function names prefixed with nx_ to prevent zlib name collisions

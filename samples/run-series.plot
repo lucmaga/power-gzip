@@ -20,7 +20,7 @@ plot '<(grep "Total compress" nx-log.log | grep "threads 1,")' using 7:5 title '
      '<(grep "Total compress" zlib-log.log | grep "threads 16,")' using 7:5 title '16 threads, ZLIB' with lines,\
      '<(grep "Total compress" zlib-log.log | grep "threads 32,")' using 7:5 title '32 threads, ZLIB' with lines,\
      '<(grep "Total compress" zlib-log.log | grep "threads 64,")' using 7:5 title '64 threads, ZLIB' with lines,\
-     '<(grep "Total compress" zlib-log.log | grep "threads 80,")' using 7:5 title '80 threads, ZLIB' with lines     
+     '<(grep "Total compress" zlib-log.log | grep "threads 80,")' using 7:5 title '80 threads, ZLIB' with lines
 
 
 set terminal pngcairo size 640,480 enhanced font 'Verdana,14'

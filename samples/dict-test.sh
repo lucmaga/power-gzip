@@ -6,7 +6,7 @@ if [ -z "$1" ]; then
 fi
 
 if [ -z "$2" ]; then
-    echo "error: supply a dictionary file and a source file"    
+    echo "error: supply a dictionary file and a source file"
     exit
 fi
 

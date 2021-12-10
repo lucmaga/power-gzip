@@ -8,9 +8,9 @@ do
 	FN=head.$1.$SZ
 	head -c $SZ $1 > $FN
 	./gzip_nxfht_test $FN
-        ./runnuma.sh $FN.nx.gz 4 		
+        ./runnuma.sh $FN.nx.gz 4 
 	rm -f $FN $FN.nx.gz $FN.*.nx.gunzip
 	echo
 	sleep 2
 done
- 
+

@@ -9,11 +9,11 @@ do
 	cat $FN > /dev/null
 	echo gzip $FN
 	/usr/bin/time  -f "\t%e real \t%U user \t%S sys" gzip $FN
-	echo	
+	echo
 	cat $FN.gz > /dev/null
 	echo gunzip $FN.gz
-	/usr/bin/time  -f "\t%e real \t%U user \t%S sys" gunzip $FN.gz	
+	/usr/bin/time  -f "\t%e real \t%U user \t%S sys" gunzip $FN.gz
 	rm -f $FN $FN.gz
 	echo
 done
- 
+

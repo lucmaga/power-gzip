@@ -63,9 +63,9 @@ static int run(unsigned int len, int step, const char* test)
 	}
 
 	/* make sure all thread goto the deflate and inflate at the same time */
-	pthread_mutex_lock(&mutex);  
+	pthread_mutex_lock(&mutex);
 	ready_count--;
-	printf("thread %lu is ready\n", pthread_self());  
+	printf("thread %lu is ready\n", pthread_self());
 	if (ready_count == 0) {
 		pthread_cond_broadcast(&cond);
 	}
@@ -119,7 +119,7 @@ int main()
 	int thread_num = THREAD_MAX;
 	ready_count = thread_num;
 
-	pthread_mutex_init(&mutex, NULL);  
+	pthread_mutex_init(&mutex, NULL);
 	pthread_cond_init(&cond, NULL);
 
 	for (int i = 0; i < thread_num; i++) {
@@ -192,7 +192,7 @@ int main()
 	for (int i = 0; i < thread_num; i++) {
 		printf("--------------------- thread %d ---------------------\n", i);
 		printf("deflate_init %f ms nx_deflate_init %f ms\n", duration[i].deflate_init, duration[i].nx_deflate_init);
-		printf("deflate      %f ms nx_deflate      %f ms\n", duration[i].deflate, duration[i].nx_deflate); 
+		printf("deflate      %f ms nx_deflate      %f ms\n", duration[i].deflate, duration[i].nx_deflate);
 		printf("inflate_init %f ms nx_inflate_init %f ms\n", duration[i].inflate_init, duration[i].nx_inflate_init);
 		printf("inflate      %f ms nx_inflate      %f ms\n", duration[i].inflate, duration[i].nx_inflate);
 		printf("\n");
@@ -201,21 +201,21 @@ int main()
 	printf("Thread number %d\n", thread_num);
 	printf("------------------------ min ------------------------\n");
 	printf("deflate_init %f ms nx_deflate_init %f ms\n", duration[thread_num+0].deflate_init, duration[thread_num+0].nx_deflate_init);
-	printf("deflate      %f ms nx_deflate      %f ms\n", duration[thread_num+0].deflate, duration[thread_num+0].nx_deflate); 
+	printf("deflate      %f ms nx_deflate      %f ms\n", duration[thread_num+0].deflate, duration[thread_num+0].nx_deflate);
 	printf("inflate_init %f ms nx_inflate_init %f ms\n", duration[thread_num+0].inflate_init, duration[thread_num+0].nx_inflate_init);
 	printf("inflate      %f ms nx_inflate      %f ms\n", duration[thread_num+0].inflate, duration[thread_num+0].nx_inflate);
 	printf("\n");
 
 	printf("------------------------ max ------------------------\n");
 	printf("deflate_init %f ms nx_deflate_init %f ms\n", duration[thread_num+1].deflate_init, duration[thread_num+1].nx_deflate_init);
-	printf("deflate      %f ms nx_deflate      %f ms\n", duration[thread_num+1].deflate, duration[thread_num+1].nx_deflate); 
+	printf("deflate      %f ms nx_deflate      %f ms\n", duration[thread_num+1].deflate, duration[thread_num+1].nx_deflate);
 	printf("inflate_init %f ms nx_inflate_init %f ms\n", duration[thread_num+1].inflate_init, duration[thread_num+1].nx_inflate_init);
 	printf("inflate      %f ms nx_inflate      %f ms\n", duration[thread_num+1].inflate, duration[thread_num+1].nx_inflate);
 	printf("\n");
 
 	printf("------------------------ avg ------------------------\n");
 	printf("deflate_init %f ms nx_deflate_init %f ms\n", duration[thread_num+2].deflate_init/thread_num, duration[thread_num+2].nx_deflate_init/thread_num);
-	printf("deflate      %f ms nx_deflate      %f ms\n", duration[thread_num+2].deflate/thread_num, duration[thread_num+2].nx_deflate/thread_num); 
+	printf("deflate      %f ms nx_deflate      %f ms\n", duration[thread_num+2].deflate/thread_num, duration[thread_num+2].nx_deflate/thread_num);
 	printf("inflate_init %f ms nx_inflate_init %f ms\n", duration[thread_num+2].inflate_init/thread_num, duration[thread_num+2].nx_inflate_init/thread_num);
 	printf("inflate      %f ms nx_inflate      %f ms\n", duration[thread_num+2].inflate/thread_num, duration[thread_num+2].nx_inflate/thread_num);
 }

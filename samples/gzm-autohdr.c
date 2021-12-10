@@ -1,4 +1,4 @@
-/* 
+/*
    gzm.c compresses files with various zlib options.
 
    ./gzm -h
@@ -45,7 +45,7 @@ typedef struct {
     int z_hist_sz;    /* file format use -15 for raw deflate; use 15 for zlib; 31 for gzip */
     int z_strategy;   /* Z_DEFAULT_STRATEGY Z_FIXED Z_HUFFMAN_ONLY Z_RLE */
     int z_flush_type; /* Z_SYNC_FLUSH Z_NO_FLUSH Z_PARTIAL_FLUSH Z_FULL_FLUSH Z_BLOCK */
-    long compressed_bytes_total; 
+    long compressed_bytes_total;
 } gzcfg_t;
 
 #ifndef COMPRESS_LEVEL
@@ -69,8 +69,8 @@ static int get_file_format(int n)
     else if (n == 2) return -15;
     else if (n >= 9  && n <= 15) return n;  /* zlib with window size 2^9 to 2^15 */
     else if (n >= 25 && n <= 31) return n;  /* gzip with window size 2^9 to 2^15 */
-    else if (n >= -15 && n <= -9) return n; /* raw with window size 2^9 to 2^15 */        
-    else             return Z_ERRNO;    
+    else if (n >= -15 && n <= -9) return n; /* raw with window size 2^9 to 2^15 */
+    else             return Z_ERRNO;
 }
 /* usage() helpers */
 static const char file_format_str[] = "gz file format: gzip: 0, zlib: 1, raw: 2";
@@ -84,7 +84,7 @@ static int get_strategy(int n)
     else if (n == 3) return Z_RLE;
     else             return Z_ERRNO;
 }
-static const char strategy_str[] = "default(DH+LZ): 0, fixed(FH+LZ): 1, huffman_only: 2, RLE: 3"; 
+static const char strategy_str[] = "default(DH+LZ): 0, fixed(FH+LZ): 1, huffman_only: 2, RLE: 3";
 
 static int get_flush_type(int n)
 {
@@ -263,8 +263,8 @@ void usage(int argc, char **argv)
     fprintf(stderr, "usage: %s [-s s] [-t t] [-f f] < source > dest\n", argv[0] );
     fprintf(stderr, "   -s followed by one of ints: %s\n", strategy_str);
     fprintf(stderr, "   -t followed by one of ints: %s\n", file_format_str);
-    fprintf(stderr, "or -t followed by one of ints: %s\n", window_sz_str);    
-    fprintf(stderr, "   -f followed by one of ints: %s\n", flush_type_str);        
+    fprintf(stderr, "or -t followed by one of ints: %s\n", window_sz_str);
+    fprintf(stderr, "   -f followed by one of ints: %s\n", flush_type_str);
 }
 
 /* compress or decompress from stdin to stdout */
@@ -272,7 +272,7 @@ int main(int argc, char **argv)
 {
     int ret;
     gzcfg_t cf;
-    
+
     /* avoid end-of-line conversions */
     SET_BINARY_MODE(stdin);
     SET_BINARY_MODE(stdout);
@@ -282,7 +282,7 @@ int main(int argc, char **argv)
     cf.z_strategy = Z_DEFAULT_STRATEGY;
     cf.z_flush_type = Z_NO_FLUSH;
     cf.compressed_bytes_total = 0;
-    
+
     /* do compression if no arguments */
     if (argc == 1) {
         ret = def(stdin, stdout, COMPRESS_LEVEL, &cf);
@@ -320,7 +320,7 @@ int main(int argc, char **argv)
 	    }
 	    else {
 		++ e;
-	    }	    
+	    }
 	    if (e>0) {
 		usage(argc, argv);
 		return -1;
@@ -341,7 +341,7 @@ int main(int argc, char **argv)
 }
 
 
-/* sample def code that doesn't use FILE I/O but memory buffers 
+/* sample def code that doesn't use FILE I/O but memory buffers
    Note:  size_of_data is the source bytes when called, and the
    dest bytes in the dest buffer on return */
 int def_mb(char *source, char *dest, int *size_of_data, gzcfg_t *cf)
@@ -369,7 +369,7 @@ int def_mb(char *source, char *dest, int *size_of_data, gzcfg_t *cf)
     if (ret != Z_OK)
         return ret;
 
-    remainder = *size_of_data; 
+    remainder = *size_of_data;
     /* compress until end of file */
     do {
 	int nbyte;
@@ -400,7 +400,7 @@ int def_mb(char *source, char *dest, int *size_of_data, gzcfg_t *cf)
 	    } */
 	    memcpy( dest, out, have );
 	    dest = dest + have;
-	    
+
         } while (strm.avail_out == 0);
         assert(strm.avail_in == 0);     /* all input will be used */
 
@@ -412,6 +412,6 @@ int def_mb(char *source, char *dest, int *size_of_data, gzcfg_t *cf)
     (void)deflateEnd(&strm);
 
     *size_of_data = cf->compressed_bytes_total;
-    
+
     return Z_OK;
 }
